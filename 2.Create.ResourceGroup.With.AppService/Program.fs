@@ -3,15 +3,25 @@ open Fake.AzureRm.Env
 
 [<EntryPoint>]
 let main argv = 
-    let e = GetEnvironment()
-    let r = new ResourceManager (e.SubscriptionId, e.TenantId, e.ApplicationId, e.Secret)
+    let env = GetEnvironment()
+    let rm = new ResourceManager (env.SubscriptionId, env.TenantId, env.ApplicationId, env.Secret)
+
     let version = 1;
-    let location = "northeurope"
+    let location = ``North Europe``
+    let webAppSku = WebAppServiceSku.``S1``
     let resource = ( sprintf "fake-azurerm-examples-resource-%i" version )
     let plan = ( sprintf "fake-azurerm-examples-plan-%i" version )
     let appService = ( sprintf "fake-azurerm-examples-app-service-%i" version )
-    r.CreateResourceGroup resource location |> Async.RunSynchronously |> ignore
-    r.CreateAppServicePlan resource plan "S1" location 1 |> Async.RunSynchronously |> ignore
-    r.CreateAppService resource plan appService location |> Async.RunSynchronously |> ignore
+
+    rm.CreateResourceGroup resource location
+        |> Async.RunSynchronously
+        |> printf "%A"
+    rm.CreateAppServicePlan resource plan webAppSku location 1
+        |> Async.RunSynchronously
+        |> printf "%A"
+    rm.CreateAppService resource plan appService location
+        |> Async.RunSynchronously
+        |> printf "%A"
+
     // TODO: Figure out how to upload the app service
     0

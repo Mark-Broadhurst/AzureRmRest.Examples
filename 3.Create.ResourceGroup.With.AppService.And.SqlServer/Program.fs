@@ -3,20 +3,29 @@ open Fake.AzureRm.Env
 
 [<EntryPoint>]
 let main argv = 
-//    printfn "%A" argv
-//    let env = GetEnvironment()
-//    let bearerToken = GetToken (env) |> Async.RunSynchronously
-//    match bearerToken with
-//    | Choice1Of2 token -> 
-//        printf "Token=%s" (token.ToString()) 
-//        CreateResourceGroup token env.SubscriptionId "my-new-resource-group" "northeurope" 
-//            |> Async.RunSynchronously 
-//            |> ignore
-//        DeleteResourceGroup token env.SubscriptionId "my-new-resource-group"
-//            |> Async.RunSynchronously 
-//            |> ignore
-//    | Choice2Of2 (Error(x,y)) ->    
-//        printf "Fail %s" (x.ToString()) 
-//            |> ignore
-//    Console.ReadLine () |> ignore
+    let env = GetEnvironment()
+    let rm = new ResourceManager (env.SubscriptionId, env.TenantId, env.ApplicationId, env.Secret)
+
+    let version = 1;
+    let location = ``North Europe``
+    let webAppSku = WebAppServiceSku.``S1``
+    let resource = ( sprintf "fake-azurerm-examples-resource-%i" version )
+    let plan = ( sprintf "fake-azurerm-examples-plan-%i" version )
+    let appService = ( sprintf "fake-azurerm-examples-app-service-%i" version )
+
+    rm.CreateResourceGroup resource location
+        |> Async.RunSynchronously
+        |> printf "%A"
+    rm.CreateAppServicePlan resource plan webAppSku location 1
+        |> Async.RunSynchronously
+        |> printf "%A"
+    rm.CreateAppService resource plan appService location
+        |> Async.RunSynchronously
+        |> printf "%A"
+    rm.CreateSqlServer resource "ServerName" "Username" "Password" location
+        |> Async.RunSynchronously
+        |> printf "%A"
+    rm.CreateSqlDatabase resource "ServerName" "DatabaseName" DatabaseSku.B location
+        |> Async.RunSynchronously
+        |> printf "%A"
     0
