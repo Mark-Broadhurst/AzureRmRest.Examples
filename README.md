@@ -1,4 +1,4 @@
-# Fake Azure RM Examples
+# Azure Rm Rest Examples
 
 Examples on how to use Fake.AzureRm nuget package
 
